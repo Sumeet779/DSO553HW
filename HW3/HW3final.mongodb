@@ -1,0 +1,65 @@
+//Q1
+//1
+db.orders.aggregate([
+    {$group:{_id:"$productName",sumQuantity:{$sum:"$quantity"}}}
+    ])
+
+//2
+db.orders.aggregate([
+    {$match: {status: "urgent"}},
+    {$group: {_id: "$productName", SumQuantity: {$sum: "$quantity"}}}
+])
+
+//3
+db.orders.aggregate([
+    {$group:{_id:["$productName","$status"],SumQuantity:{$sum:"$quantity"}}}
+    ])
+
+//4
+ db.orders.aggregate(
+  [
+    {
+      $group :
+        {
+          _id : ["$productName","$status"],
+          SumQuantity:{$sum:"$quantity"}
+        }
+    }
+     ,
+     {
+       $match: { "SumQuantity": { $gte: 10.001 } }
+     }
+  ]
+ )
+
+//or
+
+db.orders.aggregate([
+    {$group: {_id: ["$productName", "$status"], SumQuantity: {$sum: "$quantity"}}},
+    {$match : {SumQuantity: {$gt: 10}}}
+])
+
+
+// Question 2.a
+db.grades.distinct("class_id").length
+// answer 501
+
+// Question 2.b
+db.grades.distinct("student_id").length
+// answer: 10000
+
+// Question 2.c
+db.grades.aggregate([
+    {$match: {class_id: 212}},
+    {$unwind: "$scores"},
+    {$group: {_id: "$scores.type", avg: {$avg: "$scores.score"}}}
+])
+// answer: 49.32031796981391
+
+// Question 2. d
+db.grades.aggregate([
+    {$match: {class_id: 212}},
+    {$unwind: "$scores"},
+    {$group: {_id: "$scores.type", StdDev: {$stdDevSamp: "$scores.score"}}}
+])
+// std dev of exam scores is 29.345839403132832
